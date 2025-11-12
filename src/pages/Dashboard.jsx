@@ -17,7 +17,105 @@ export default function Dashboard() {
   const [source, setSource] = useState('yahoo');
   const [searchResults, setSearchResults] = useState([]);
   const [user, setUser] = useState(null);
+  const [showColumnSettings, setShowColumnSettings] = useState(false);
   const queryClient = useQueryClient();
+
+  // Column configuration by indicator
+  const [visibleColumns, setVisibleColumns] = useState({
+    // Core (always visible)
+    date: true,
+    close: true,
+    change_pct: true,
+    volume: true,
+    final_signal: true,
+    
+    // RSI Module
+    rsi: true,
+    rsi_signal: false,
+    rsi_bull_div: false,
+    rsi_bear_div: false,
+    
+    // EMA Module
+    ema_cross: true,
+    ema_9: false,
+    ema_34: false,
+    ema_200: false,
+    
+    // MACD Module
+    macd_cross: true,
+    macd_line: false,
+    macd_histogram: false,
+    
+    // Bollinger Module
+    bb_signal: true,
+    bb_position: true,
+    bb_upper: false,
+    bb_lower: false,
+    
+    // Volume Module
+    vol_spike: true,
+    vol_trend: false,
+    
+    // Numerology Module (Premium)
+    numerology_master: true,
+    numerology_meaning: false,
+    hebrew_date: false,
+    hebrew_holiday: false,
+    shemitah_alert: false
+  });
+
+  const columnGroups = {
+    core: {
+      name: 'Core Data',
+      premium: false,
+      columns: ['date', 'close', 'change_pct', 'volume', 'final_signal']
+    },
+    rsi: {
+      name: 'RSI Indicator',
+      premium: false,
+      columns: ['rsi', 'rsi_signal', 'rsi_bull_div', 'rsi_bear_div']
+    },
+    ema: {
+      name: 'EMA Indicators',
+      premium: false,
+      columns: ['ema_cross', 'ema_9', 'ema_34', 'ema_200']
+    },
+    macd: {
+      name: 'MACD Indicator',
+      premium: false,
+      columns: ['macd_cross', 'macd_line', 'macd_histogram']
+    },
+    bollinger: {
+      name: 'Bollinger Bands',
+      premium: false,
+      columns: ['bb_signal', 'bb_position', 'bb_upper', 'bb_lower']
+    },
+    volume: {
+      name: 'Volume Analysis',
+      premium: false,
+      columns: ['vol_spike', 'vol_trend']
+    },
+    numerology: {
+      name: 'Numerology (Premium)',
+      premium: true,
+      requiredAccess: 'has_numerology_premium',
+      columns: ['numerology_master', 'numerology_meaning', 'hebrew_date', 'hebrew_holiday', 'shemitah_alert']
+    }
+  };
+
+  const toggleColumn = (col) => {
+    setVisibleColumns(prev => ({ ...prev, [col]: !prev[col] }));
+  };
+
+  const toggleGroup = (groupKey) => {
+    const group = columnGroups[groupKey];
+    const allVisible = group.columns.every(col => visibleColumns[col]);
+    const newState = { ...visibleColumns };
+    group.columns.forEach(col => {
+      newState[col] = !allVisible;
+    });
+    setVisibleColumns(newState);
+  };
 
   useEffect(() => {
     loadUser();
@@ -210,9 +308,17 @@ export default function Dashboard() {
                     Results for {ticker} ({signals.length} days)
                   </h3>
                   <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setShowColumnSettings(!showColumnSettings)}
+                    >
+                      <Settings className="w-4 h-4 mr-2" />
+                      Columns
+                    </Button>
                     <Button variant="outline" size="sm" onClick={handleAddToWatchlist}>
                       <Star className="w-4 h-4 mr-2" />
-                      Add to Watchlist
+                      Watchlist
                     </Button>
                     <Button variant="outline" size="sm" onClick={exportToCSV}>
                       <Download className="w-4 h-4 mr-2" />
@@ -221,6 +327,60 @@ export default function Dashboard() {
                   </div>
                 </div>
 
+                {/* Column Settings Panel */}
+                {showColumnSettings && (
+                  <Card className="bg-slate-50">
+                    <CardHeader>
+                      <CardTitle className="text-lg">📊 Column Visibility</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {Object.entries(columnGroups).map(([key, group]) => {
+                          const hasAccess = !group.premium || user[group.requiredAccess];
+                          return (
+                            <div key={key} className={`border rounded-lg p-3 ${!hasAccess ? 'opacity-50 bg-gray-100' : 'bg-white'}`}>
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-semibold text-sm flex items-center gap-1">
+                                  {group.name}
+                                  {group.premium && !hasAccess && <span className="text-xs text-red-600">🔒</span>}
+                                </h4>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => hasAccess && toggleGroup(key)}
+                                  disabled={!hasAccess}
+                                  className="h-6 px-2 text-xs"
+                                >
+                                  {group.columns.every(col => visibleColumns[col]) ? 'Hide All' : 'Show All'}
+                                </Button>
+                              </div>
+                              <div className="space-y-1">
+                                {group.columns.map(col => (
+                                  <label key={col} className="flex items-center gap-2 text-xs cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={visibleColumns[col]}
+                                      onChange={() => hasAccess && toggleColumn(col)}
+                                      disabled={!hasAccess}
+                                      className="rounded"
+                                    />
+                                    <span className={!hasAccess ? 'text-gray-400' : ''}>
+                                      {col.replace(/_/g, ' ')}
+                                    </span>
+                                  </label>
+                                ))}
+                              </div>
+                              {group.premium && !hasAccess && (
+                                <p className="text-xs text-red-600 mt-2">Upgrade to Pro/Elite</p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
                 {/* Data Table */}
                 <Card>
                   <CardContent className="p-0">
@@ -228,61 +388,141 @@ export default function Dashboard() {
                       <table className="w-full text-sm">
                         <thead className="bg-slate-100 border-b sticky top-0">
                           <tr>
-                            <th className="px-3 py-2 text-left font-semibold">Date</th>
-                            <th className="px-3 py-2 text-right font-semibold">Close</th>
-                            <th className="px-3 py-2 text-right font-semibold">Change %</th>
-                            <th className="px-3 py-2 text-right font-semibold">Volume</th>
-                            <th className="px-3 py-2 text-center font-semibold">Signal</th>
-                            <th className="px-3 py-2 text-right font-semibold">RSI</th>
-                            <th className="px-3 py-2 text-center font-semibold">EMA Cross</th>
-                            <th className="px-3 py-2 text-center font-semibold">MACD</th>
-                            <th className="px-3 py-2 text-center font-semibold">BB Signal</th>
-                            <th className="px-3 py-2 text-center font-semibold">BB Pos</th>
-                            <th className="px-3 py-2 text-center font-semibold">Vol Spike</th>
-                            <th className="px-3 py-2 text-center font-semibold">Master#</th>
+                            {visibleColumns.date && <th className="px-3 py-2 text-left font-semibold">Date</th>}
+                            {visibleColumns.close && <th className="px-3 py-2 text-right font-semibold">Close</th>}
+                            {visibleColumns.change_pct && <th className="px-3 py-2 text-right font-semibold">Change %</th>}
+                            {visibleColumns.volume && <th className="px-3 py-2 text-right font-semibold">Volume</th>}
+                            {visibleColumns.final_signal && <th className="px-3 py-2 text-center font-semibold">Signal</th>}
+                            
+                            {/* RSI */}
+                            {visibleColumns.rsi && <th className="px-3 py-2 text-right font-semibold">RSI</th>}
+                            {visibleColumns.rsi_signal && <th className="px-3 py-2 text-center font-semibold">RSI Signal</th>}
+                            {visibleColumns.rsi_bull_div && <th className="px-3 py-2 text-center font-semibold">RSI Bull</th>}
+                            {visibleColumns.rsi_bear_div && <th className="px-3 py-2 text-center font-semibold">RSI Bear</th>}
+                            
+                            {/* EMA */}
+                            {visibleColumns.ema_cross && <th className="px-3 py-2 text-center font-semibold">EMA Cross</th>}
+                            {visibleColumns.ema_9 && <th className="px-3 py-2 text-right font-semibold">EMA 9</th>}
+                            {visibleColumns.ema_34 && <th className="px-3 py-2 text-right font-semibold">EMA 34</th>}
+                            {visibleColumns.ema_200 && <th className="px-3 py-2 text-right font-semibold">EMA 200</th>}
+                            
+                            {/* MACD */}
+                            {visibleColumns.macd_cross && <th className="px-3 py-2 text-center font-semibold">MACD</th>}
+                            {visibleColumns.macd_line && <th className="px-3 py-2 text-right font-semibold">MACD Line</th>}
+                            {visibleColumns.macd_histogram && <th className="px-3 py-2 text-right font-semibold">MACD Hist</th>}
+                            
+                            {/* Bollinger */}
+                            {visibleColumns.bb_signal && <th className="px-3 py-2 text-center font-semibold">BB Signal</th>}
+                            {visibleColumns.bb_position && <th className="px-3 py-2 text-center font-semibold">BB Pos</th>}
+                            {visibleColumns.bb_upper && <th className="px-3 py-2 text-right font-semibold">BB Upper</th>}
+                            {visibleColumns.bb_lower && <th className="px-3 py-2 text-right font-semibold">BB Lower</th>}
+                            
+                            {/* Volume */}
+                            {visibleColumns.vol_spike && <th className="px-3 py-2 text-center font-semibold">Vol Spike</th>}
+                            {visibleColumns.vol_trend && <th className="px-3 py-2 text-center font-semibold">Vol Trend</th>}
+                            
+                            {/* Numerology (Premium) */}
+                            {visibleColumns.numerology_master && user.has_numerology_premium && <th className="px-3 py-2 text-center font-semibold">Master#</th>}
+                            {visibleColumns.numerology_meaning && user.has_numerology_premium && <th className="px-3 py-2 text-left font-semibold">Meaning</th>}
+                            {visibleColumns.hebrew_date && user.has_numerology_premium && <th className="px-3 py-2 text-left font-semibold">Hebrew Date</th>}
+                            {visibleColumns.hebrew_holiday && user.has_numerology_premium && <th className="px-3 py-2 text-left font-semibold">Holiday</th>}
+                            {visibleColumns.shemitah_alert && user.has_numerology_premium && <th className="px-3 py-2 text-left font-semibold">Shemitah</th>}
                           </tr>
                         </thead>
                         <tbody>
                           {signals.map((s, idx) => (
                             <tr key={s.id} className={`border-b hover:bg-slate-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
-                              <td className="px-3 py-2 font-medium">{s.date}</td>
-                              <td className="px-3 py-2 text-right">${s.close?.toFixed(2)}</td>
-                              <td className={`px-3 py-2 text-right font-semibold ${s.close_pct_change > 0 ? 'text-green-600' : s.close_pct_change < 0 ? 'text-red-600' : 'text-slate-600'}`}>
-                                {s.close_pct_change?.toFixed(2)}%
-                              </td>
-                              <td className="px-3 py-2 text-right text-xs">{s.volume ? (s.volume / 1000000).toFixed(1) + 'M' : '-'}</td>
-                              <td className="px-3 py-2 text-center">
-                                {s.final_signal === 'BUY' && <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded font-semibold text-xs">BUY</span>}
-                                {s.final_signal === 'SELL' && <span className="px-2 py-0.5 bg-red-100 text-red-800 rounded font-semibold text-xs">SELL</span>}
-                                {s.final_signal === 'HOLD' && <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">HOLD</span>}
-                              </td>
-                              <td className={`px-3 py-2 text-right ${s.rsi > 70 ? 'text-red-600 font-semibold' : s.rsi < 30 ? 'text-green-600 font-semibold' : 'text-slate-600'}`}>
-                                {s.rsi?.toFixed(0)}
-                              </td>
-                              <td className="px-3 py-2 text-center text-xs">
-                                {s.buy_cross && <span className="text-green-600 font-semibold">↑ Fast</span>}
-                                {s.sell_cross && <span className="text-red-600 font-semibold">↓ Fast</span>}
-                                {s.buy_cross_9_34 && <span className="text-green-600 font-semibold">↑ 9/34</span>}
-                                {s.sell_cross_9_34 && <span className="text-red-600 font-semibold">↓ 9/34</span>}
-                                {!s.buy_cross && !s.sell_cross && !s.buy_cross_9_34 && !s.sell_cross_9_34 && '-'}
-                              </td>
-                              <td className="px-3 py-2 text-center text-xs">
-                                {s.macd_cross_up && <span className="text-green-600 font-semibold">↑</span>}
-                                {s.macd_cross_down && <span className="text-red-600 font-semibold">↓</span>}
-                                {!s.macd_cross_up && !s.macd_cross_down && '-'}
-                              </td>
-                              <td className="px-3 py-2 text-center text-xs">
-                                {s.bb_squeeze ? <span className="text-orange-600 font-semibold">Squeeze</span> : '-'}
-                              </td>
-                              <td className={`px-3 py-2 text-right text-xs ${s.bb_position > 0.8 ? 'text-red-600 font-semibold' : s.bb_position < 0.2 ? 'text-green-600 font-semibold' : 'text-slate-600'}`}>
-                                {s.bb_position ? (s.bb_position * 100).toFixed(0) + '%' : '-'}
-                              </td>
-                              <td className="px-3 py-2 text-center">
-                                {s.vol_spike ? <span className="text-blue-600 font-semibold text-xs">📈</span> : '-'}
-                              </td>
-                              <td className="px-3 py-2 text-center">
-                                {s.has_master_number ? <span className="text-purple-600 font-semibold">🔮</span> : '-'}
-                              </td>
+                              {visibleColumns.date && <td className="px-3 py-2 font-medium">{s.date}</td>}
+                              {visibleColumns.close && <td className="px-3 py-2 text-right">${s.close?.toFixed(2)}</td>}
+                              {visibleColumns.change_pct && (
+                                <td className={`px-3 py-2 text-right font-semibold ${s.close_pct_change > 0 ? 'text-green-600' : s.close_pct_change < 0 ? 'text-red-600' : 'text-slate-600'}`}>
+                                  {s.close_pct_change?.toFixed(2)}%
+                                </td>
+                              )}
+                              {visibleColumns.volume && <td className="px-3 py-2 text-right text-xs">{s.volume ? (s.volume / 1000000).toFixed(1) + 'M' : '-'}</td>}
+                              {visibleColumns.final_signal && (
+                                <td className="px-3 py-2 text-center">
+                                  {s.final_signal === 'BUY' && <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded font-semibold text-xs">BUY</span>}
+                                  {s.final_signal === 'SELL' && <span className="px-2 py-0.5 bg-red-100 text-red-800 rounded font-semibold text-xs">SELL</span>}
+                                  {s.final_signal === 'HOLD' && <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">HOLD</span>}
+                                </td>
+                              )}
+                              
+                              {/* RSI */}
+                              {visibleColumns.rsi && (
+                                <td className={`px-3 py-2 text-right ${s.rsi > 70 ? 'text-red-600 font-semibold' : s.rsi < 30 ? 'text-green-600 font-semibold' : 'text-slate-600'}`}>
+                                  {s.rsi?.toFixed(0)}
+                                </td>
+                              )}
+                              {visibleColumns.rsi_signal && <td className="px-3 py-2 text-center text-xs">{s.rsi_signal || '-'}</td>}
+                              {visibleColumns.rsi_bull_div && <td className="px-3 py-2 text-center">{s.rsi_bull_div ? '✓' : '-'}</td>}
+                              {visibleColumns.rsi_bear_div && <td className="px-3 py-2 text-center">{s.rsi_bear_div ? '✓' : '-'}</td>}
+                              
+                              {/* EMA */}
+                              {visibleColumns.ema_cross && (
+                                <td className="px-3 py-2 text-center text-xs">
+                                  {s.buy_cross && <span className="text-green-600 font-semibold">↑ Fast</span>}
+                                  {s.sell_cross && <span className="text-red-600 font-semibold">↓ Fast</span>}
+                                  {s.buy_cross_9_34 && <span className="text-green-600 font-semibold">↑ 9/34</span>}
+                                  {s.sell_cross_9_34 && <span className="text-red-600 font-semibold">↓ 9/34</span>}
+                                  {!s.buy_cross && !s.sell_cross && !s.buy_cross_9_34 && !s.sell_cross_9_34 && '-'}
+                                </td>
+                              )}
+                              {visibleColumns.ema_9 && <td className="px-3 py-2 text-right text-xs">{s.ema_9?.toFixed(2)}</td>}
+                              {visibleColumns.ema_34 && <td className="px-3 py-2 text-right text-xs">{s.ema_34?.toFixed(2)}</td>}
+                              {visibleColumns.ema_200 && <td className="px-3 py-2 text-right text-xs">{s.ema_200?.toFixed(2)}</td>}
+                              
+                              {/* MACD */}
+                              {visibleColumns.macd_cross && (
+                                <td className="px-3 py-2 text-center text-xs">
+                                  {s.macd_cross_up && <span className="text-green-600 font-semibold">↑</span>}
+                                  {s.macd_cross_down && <span className="text-red-600 font-semibold">↓</span>}
+                                  {!s.macd_cross_up && !s.macd_cross_down && '-'}
+                                </td>
+                              )}
+                              {visibleColumns.macd_line && <td className="px-3 py-2 text-right text-xs">{s.macd_line?.toFixed(3)}</td>}
+                              {visibleColumns.macd_histogram && <td className="px-3 py-2 text-right text-xs">{s.macd_histogram?.toFixed(3)}</td>}
+                              
+                              {/* Bollinger */}
+                              {visibleColumns.bb_signal && (
+                                <td className="px-3 py-2 text-center text-xs">
+                                  {s.bb_squeeze ? <span className="text-orange-600 font-semibold">Squeeze</span> : '-'}
+                                </td>
+                              )}
+                              {visibleColumns.bb_position && (
+                                <td className={`px-3 py-2 text-right text-xs ${s.bb_position > 0.8 ? 'text-red-600 font-semibold' : s.bb_position < 0.2 ? 'text-green-600 font-semibold' : 'text-slate-600'}`}>
+                                  {s.bb_position ? (s.bb_position * 100).toFixed(0) + '%' : '-'}
+                                </td>
+                              )}
+                              {visibleColumns.bb_upper && <td className="px-3 py-2 text-right text-xs">{s.bb_upper?.toFixed(2)}</td>}
+                              {visibleColumns.bb_lower && <td className="px-3 py-2 text-right text-xs">{s.bb_lower?.toFixed(2)}</td>}
+                              
+                              {/* Volume */}
+                              {visibleColumns.vol_spike && (
+                                <td className="px-3 py-2 text-center">
+                                  {s.vol_spike ? <span className="text-blue-600 font-semibold text-xs">📈</span> : '-'}
+                                </td>
+                              )}
+                              {visibleColumns.vol_trend && <td className="px-3 py-2 text-center text-xs">{s.vol_trend || '-'}</td>}
+                              
+                              {/* Numerology (Premium only) */}
+                              {visibleColumns.numerology_master && user.has_numerology_premium && (
+                                <td className="px-3 py-2 text-center">
+                                  {s.has_master_number ? <span className="text-purple-600 font-semibold">🔮</span> : '-'}
+                                </td>
+                              )}
+                              {visibleColumns.numerology_meaning && user.has_numerology_premium && (
+                                <td className="px-3 py-2 text-xs">{s.numerology_meaning || '-'}</td>
+                              )}
+                              {visibleColumns.hebrew_date && user.has_numerology_premium && (
+                                <td className="px-3 py-2 text-xs">{s.hebrew_date || '-'}</td>
+                              )}
+                              {visibleColumns.hebrew_holiday && user.has_numerology_premium && (
+                                <td className="px-3 py-2 text-xs">{s.hebrew_holiday_alert || '-'}</td>
+                              )}
+                              {visibleColumns.shemitah_alert && user.has_numerology_premium && (
+                                <td className="px-3 py-2 text-xs">{s.shemitah_alert || '-'}</td>
+                              )}
                             </tr>
                           ))}
                         </tbody>
