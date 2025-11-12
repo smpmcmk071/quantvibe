@@ -475,9 +475,9 @@ export default function Dashboard() {
                               {/* MACD */}
                               {visibleColumns.macd_cross && (
                                 <td className="px-2 py-1 text-center">
-                                  {s.macd_cross_up && <span className="text-green-600 font-semibold">↑</span>}
-                                  {s.macd_cross_down && <span className="text-red-600 font-semibold">↓</span>}
-                                  {!s.macd_cross_up && !s.macd_cross_down && '-'}
+                                  {s.macd_cross_up && <span className="text-green-600 font-bold text-lg">▲</span>}
+                                  {s.macd_cross_down && <span className="text-red-600 font-bold text-lg">▼</span>}
+                                  {!s.macd_cross_up && !s.macd_cross_down && <span className="text-slate-300">-</span>}
                                 </td>
                               )}
                               {visibleColumns.macd_line && <td className="px-2 py-1 text-right">{s.macd_line?.toFixed(3)}</td>}
