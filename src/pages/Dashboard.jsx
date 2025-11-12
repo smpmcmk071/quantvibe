@@ -442,9 +442,13 @@ export default function Dashboard() {
                               {visibleColumns.volume && <td className={`px-2 py-1 text-right sticky left-[240px] z-10 border-r-2 border-slate-300 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>{s.volume ? (s.volume / 1000000).toFixed(1) + 'M' : '-'}</td>}
                               {visibleColumns.final_signal && (
                                 <td className="px-2 py-1 text-center">
-                                  {s.final_signal === 'BUY' && <span className="px-3 py-1 bg-green-100 text-green-800 rounded font-bold text-sm">🟢 BUY</span>}
-                                  {s.final_signal === 'SELL' && <span className="px-3 py-1 bg-red-100 text-red-800 rounded font-bold text-sm">🔴 SELL</span>}
-                                  {s.final_signal === 'HOLD' && <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded font-semibold text-sm">⚪ HOLD</span>}
+                                  {s.final_signal?.toUpperCase() === 'BUY' && <span className="px-3 py-1 bg-green-100 text-green-800 rounded font-bold text-sm">🟢 BUY</span>}
+                                  {s.final_signal?.toUpperCase() === 'SELL' && <span className="px-3 py-1 bg-red-100 text-red-800 rounded font-bold text-sm">🔴 SELL</span>}
+                                  {s.final_signal?.toUpperCase() === 'HOLD' && <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded font-semibold text-sm">⚪ HOLD</span>}
+                                  {!s.final_signal && <span className="text-slate-400 text-xs">-</span>}
+                                  {s.final_signal && !['BUY', 'SELL', 'HOLD'].includes(s.final_signal.toUpperCase()) && (
+                                    <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">{s.final_signal}</span>
+                                  )}
                                 </td>
                               )}
                               
