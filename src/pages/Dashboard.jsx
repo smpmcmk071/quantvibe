@@ -384,14 +384,14 @@ export default function Dashboard() {
                 {/* Data Table */}
                 <Card>
                   <CardContent className="p-0">
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead className="bg-slate-100 border-b sticky top-0">
+                    <div className="overflow-auto max-h-[600px]">
+                      <table className="w-full text-sm relative">
+                        <thead className="bg-slate-100 border-b sticky top-0 z-10">
                           <tr>
-                            {visibleColumns.date && <th className="px-3 py-2 text-left font-semibold">Date</th>}
-                            {visibleColumns.close && <th className="px-3 py-2 text-right font-semibold">Close</th>}
-                            {visibleColumns.change_pct && <th className="px-3 py-2 text-right font-semibold">Change %</th>}
-                            {visibleColumns.volume && <th className="px-3 py-2 text-right font-semibold">Volume</th>}
+                            {visibleColumns.date && <th className="px-3 py-2 text-left font-semibold sticky left-0 bg-slate-100 z-20 border-r-2 border-slate-300">Date</th>}
+                            {visibleColumns.close && <th className="px-3 py-2 text-right font-semibold sticky left-[100px] bg-slate-100 z-20 border-r-2 border-slate-300">Close</th>}
+                            {visibleColumns.change_pct && <th className="px-3 py-2 text-right font-semibold sticky left-[180px] bg-slate-100 z-20 border-r-2 border-slate-300">Change %</th>}
+                            {visibleColumns.volume && <th className="px-3 py-2 text-right font-semibold sticky left-[280px] bg-slate-100 z-20 border-r-2 border-slate-300">Volume</th>}
                             {visibleColumns.final_signal && <th className="px-3 py-2 text-center font-semibold">Signal</th>}
                             
                             {/* RSI */}
@@ -432,14 +432,14 @@ export default function Dashboard() {
                         <tbody>
                           {signals.map((s, idx) => (
                             <tr key={s.id} className={`border-b hover:bg-slate-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
-                              {visibleColumns.date && <td className="px-3 py-2 font-medium">{s.date}</td>}
-                              {visibleColumns.close && <td className="px-3 py-2 text-right">${s.close?.toFixed(2)}</td>}
+                              {visibleColumns.date && <td className={`px-3 py-2 font-medium sticky left-0 z-10 border-r-2 border-slate-300 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>{s.date}</td>}
+                              {visibleColumns.close && <td className={`px-3 py-2 text-right sticky left-[100px] z-10 border-r-2 border-slate-300 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>${s.close?.toFixed(2)}</td>}
                               {visibleColumns.change_pct && (
-                                <td className={`px-3 py-2 text-right font-semibold ${s.close_pct_change > 0 ? 'text-green-600' : s.close_pct_change < 0 ? 'text-red-600' : 'text-slate-600'}`}>
+                                <td className={`px-3 py-2 text-right font-semibold sticky left-[180px] z-10 border-r-2 border-slate-300 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} ${s.close_pct_change > 0 ? 'text-green-600' : s.close_pct_change < 0 ? 'text-red-600' : 'text-slate-600'}`}>
                                   {s.close_pct_change?.toFixed(2)}%
                                 </td>
                               )}
-                              {visibleColumns.volume && <td className="px-3 py-2 text-right text-xs">{s.volume ? (s.volume / 1000000).toFixed(1) + 'M' : '-'}</td>}
+                              {visibleColumns.volume && <td className={`px-3 py-2 text-right text-xs sticky left-[280px] z-10 border-r-2 border-slate-300 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>{s.volume ? (s.volume / 1000000).toFixed(1) + 'M' : '-'}</td>}
                               {visibleColumns.final_signal && (
                                 <td className="px-3 py-2 text-center">
                                   {s.final_signal === 'BUY' && <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded font-semibold text-xs">BUY</span>}
