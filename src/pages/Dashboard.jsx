@@ -442,9 +442,9 @@ export default function Dashboard() {
                               {visibleColumns.volume && <td className={`px-2 py-1 text-right sticky left-[240px] z-10 border-r-2 border-slate-300 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>{s.volume ? (s.volume / 1000000).toFixed(1) + 'M' : '-'}</td>}
                               {visibleColumns.final_signal && (
                                 <td className="px-2 py-1 text-center">
-                                  {s.final_signal === 'BUY' && <span className="px-3 py-1 bg-green-100 text-green-800 rounded font-bold text-sm">BUY</span>}
-                                  {s.final_signal === 'SELL' && <span className="px-3 py-1 bg-red-100 text-red-800 rounded font-bold text-sm">SELL</span>}
-                                  {s.final_signal === 'HOLD' && <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded font-semibold text-sm">HOLD</span>}
+                                  {s.final_signal === 'BUY' && <span className="px-3 py-1 bg-green-100 text-green-800 rounded font-bold text-sm">🟢 BUY</span>}
+                                  {s.final_signal === 'SELL' && <span className="px-3 py-1 bg-red-100 text-red-800 rounded font-bold text-sm">🔴 SELL</span>}
+                                  {s.final_signal === 'HOLD' && <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded font-semibold text-sm">⚪ HOLD</span>}
                                 </td>
                               )}
                               
@@ -461,11 +461,11 @@ export default function Dashboard() {
                               {/* EMA */}
                               {visibleColumns.ema_cross && (
                                 <td className="px-2 py-1 text-center">
-                                  {s.buy_cross && <span className="text-green-600 font-semibold">↑ Fast</span>}
-                                  {s.sell_cross && <span className="text-red-600 font-semibold">↓ Fast</span>}
-                                  {s.buy_cross_9_34 && <span className="text-green-600 font-semibold">↑ 9/34</span>}
-                                  {s.sell_cross_9_34 && <span className="text-red-600 font-semibold">↓ 9/34</span>}
-                                  {!s.buy_cross && !s.sell_cross && !s.buy_cross_9_34 && !s.sell_cross_9_34 && '-'}
+                                  {s.buy_cross && <span className="text-green-600 font-bold text-base">⬆️</span>}
+                                  {s.sell_cross && <span className="text-red-600 font-bold text-base">⬇️</span>}
+                                  {s.buy_cross_9_34 && <span className="text-green-500 font-bold text-base">↗️</span>}
+                                  {s.sell_cross_9_34 && <span className="text-red-500 font-bold text-base">↘️</span>}
+                                  {!s.buy_cross && !s.sell_cross && !s.buy_cross_9_34 && !s.sell_cross_9_34 && <span className="text-slate-300">◆</span>}
                                 </td>
                               )}
                               {visibleColumns.ema_9 && <td className="px-2 py-1 text-right">{s.ema_9?.toFixed(2)}</td>}
@@ -486,7 +486,7 @@ export default function Dashboard() {
                               {/* Bollinger */}
                               {visibleColumns.bb_signal && (
                                 <td className="px-2 py-1 text-center">
-                                  {s.bb_squeeze ? <span className="text-orange-600 font-semibold">Squeeze</span> : '-'}
+                                  {s.bb_squeeze ? <span className="text-orange-600 font-bold text-lg">⚡</span> : <span className="text-slate-300">○</span>}
                                 </td>
                               )}
                               {visibleColumns.bb_position && (
@@ -500,7 +500,7 @@ export default function Dashboard() {
                               {/* Volume */}
                               {visibleColumns.vol_spike && (
                                 <td className="px-2 py-1 text-center">
-                                  {s.vol_spike ? <span className="text-blue-600 font-semibold">📈</span> : '-'}
+                                  {s.vol_spike ? <span className="text-blue-600 font-bold text-base">📊</span> : <span className="text-slate-300">▬</span>}
                                 </td>
                               )}
                               {visibleColumns.vol_trend && <td className="px-2 py-1 text-center">{s.vol_trend || '-'}</td>}
@@ -508,7 +508,7 @@ export default function Dashboard() {
                               {/* Numerology (Premium only) */}
                               {visibleColumns.numerology_master && user.has_numerology_premium && (
                                 <td className="px-2 py-1 text-center">
-                                  {s.has_master_number ? <span className="text-purple-600 font-semibold">🔮</span> : '-'}
+                                  {s.has_master_number ? <span className="text-purple-600 font-bold text-base">🔮</span> : <span className="text-slate-300">○</span>}
                                 </td>
                               )}
                               {visibleColumns.numerology_meaning && user.has_numerology_premium && (
