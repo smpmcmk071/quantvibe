@@ -221,41 +221,77 @@ export default function Dashboard() {
                   </div>
                 </div>
 
+                {/* Data Table */}
+                <Card>
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-slate-100 border-b sticky top-0">
+                          <tr>
+                            <th className="px-3 py-2 text-left font-semibold">Date</th>
+                            <th className="px-3 py-2 text-right font-semibold">Close</th>
+                            <th className="px-3 py-2 text-right font-semibold">Change %</th>
+                            <th className="px-3 py-2 text-right font-semibold">Volume</th>
+                            <th className="px-3 py-2 text-center font-semibold">Signal</th>
+                            <th className="px-3 py-2 text-right font-semibold">RSI</th>
+                            <th className="px-3 py-2 text-center font-semibold">EMA Cross</th>
+                            <th className="px-3 py-2 text-center font-semibold">MACD</th>
+                            <th className="px-3 py-2 text-center font-semibold">BB Signal</th>
+                            <th className="px-3 py-2 text-center font-semibold">BB Pos</th>
+                            <th className="px-3 py-2 text-center font-semibold">Vol Spike</th>
+                            <th className="px-3 py-2 text-center font-semibold">Master#</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {signals.map((s, idx) => (
+                            <tr key={s.id} className={`border-b hover:bg-slate-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
+                              <td className="px-3 py-2 font-medium">{s.date}</td>
+                              <td className="px-3 py-2 text-right">${s.close?.toFixed(2)}</td>
+                              <td className={`px-3 py-2 text-right font-semibold ${s.close_pct_change > 0 ? 'text-green-600' : s.close_pct_change < 0 ? 'text-red-600' : 'text-slate-600'}`}>
+                                {s.close_pct_change?.toFixed(2)}%
+                              </td>
+                              <td className="px-3 py-2 text-right text-xs">{s.volume ? (s.volume / 1000000).toFixed(1) + 'M' : '-'}</td>
+                              <td className="px-3 py-2 text-center">
+                                {s.final_signal === 'BUY' && <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded font-semibold text-xs">BUY</span>}
+                                {s.final_signal === 'SELL' && <span className="px-2 py-0.5 bg-red-100 text-red-800 rounded font-semibold text-xs">SELL</span>}
+                                {s.final_signal === 'HOLD' && <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs">HOLD</span>}
+                              </td>
+                              <td className={`px-3 py-2 text-right ${s.rsi > 70 ? 'text-red-600 font-semibold' : s.rsi < 30 ? 'text-green-600 font-semibold' : 'text-slate-600'}`}>
+                                {s.rsi?.toFixed(0)}
+                              </td>
+                              <td className="px-3 py-2 text-center text-xs">
+                                {s.buy_cross && <span className="text-green-600 font-semibold">↑ Fast</span>}
+                                {s.sell_cross && <span className="text-red-600 font-semibold">↓ Fast</span>}
+                                {s.buy_cross_9_34 && <span className="text-green-600 font-semibold">↑ 9/34</span>}
+                                {s.sell_cross_9_34 && <span className="text-red-600 font-semibold">↓ 9/34</span>}
+                                {!s.buy_cross && !s.sell_cross && !s.buy_cross_9_34 && !s.sell_cross_9_34 && '-'}
+                              </td>
+                              <td className="px-3 py-2 text-center text-xs">
+                                {s.macd_cross_up && <span className="text-green-600 font-semibold">↑</span>}
+                                {s.macd_cross_down && <span className="text-red-600 font-semibold">↓</span>}
+                                {!s.macd_cross_up && !s.macd_cross_down && '-'}
+                              </td>
+                              <td className="px-3 py-2 text-center text-xs">
+                                {s.bb_squeeze ? <span className="text-orange-600 font-semibold">Squeeze</span> : '-'}
+                              </td>
+                              <td className={`px-3 py-2 text-right text-xs ${s.bb_position > 0.8 ? 'text-red-600 font-semibold' : s.bb_position < 0.2 ? 'text-green-600 font-semibold' : 'text-slate-600'}`}>
+                                {s.bb_position ? (s.bb_position * 100).toFixed(0) + '%' : '-'}
+                              </td>
+                              <td className="px-3 py-2 text-center">
+                                {s.vol_spike ? <span className="text-blue-600 font-semibold text-xs">📈</span> : '-'}
+                              </td>
+                              <td className="px-3 py-2 text-center">
+                                {s.has_master_number ? <span className="text-purple-600 font-semibold">🔮</span> : '-'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 <SignalChart data={signals} ticker={ticker} />
-
-                {/* Numerology Access Control */}
-                <AccessControl
-                  hasAccess={user.has_numerology_premium}
-                  featureName="Numerology Premium Content"
-                  requiredTier="Pro or Elite"
-                >
-                  <Card className="bg-purple-50 border-purple-200">
-                    <CardHeader>
-                      <CardTitle className="text-purple-900">🔮 Numerology Insights</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-3 gap-4">
-                        {signals.slice(0, 5).map((s, i) => (
-                          <div key={i} className="text-sm">
-                            <p className="font-semibold">{s.date}</p>
-                            {s.has_master_number && (
-                              <p className="text-purple-700">Master Number: {s.master_locations}</p>
-                            )}
-                            {s.hebrew_holiday_alert && (
-                              <p className="text-purple-600">{s.hebrew_holiday_alert}</p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </AccessControl>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {signals.slice(0, 9).map((signal) => (
-                    <SignalCard key={signal.id} signal={signal} />
-                  ))}
-                </div>
               </>
             )}
           </TabsContent>
