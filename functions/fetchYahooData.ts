@@ -69,6 +69,9 @@ Deno.serve(async (req) => {
             }
         }
 
+        // Reverse to get most recent first
+        ohlcvData.reverse();
+
         return Response.json({
             success: true,
             ticker: ticker.toUpperCase(),
