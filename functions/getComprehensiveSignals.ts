@@ -154,26 +154,10 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { ticker, interval = '1d', period = '30d', config = {} } = await req.json();
+        const { data, config = {} } = await req.json();
 
-        if (!ticker) {
-            return Response.json({ error: 'Ticker is required' }, { status: 400 });
-        }
-
-        // Fetch data ONCE
-        const fetchResponse = await base44.functions.invoke('fetchYahooData', {
-            ticker,
-            interval,
-            period
-        });
-
-        if (fetchResponse.data.error) {
-            return Response.json({ error: fetchResponse.data.error }, { status: 400 });
-        }
-
-        const data = fetchResponse.data.data;
-        if (!data || data.length === 0) {
-            return Response.json({ error: 'No data available' }, { status: 400 });
+        if (!data || !Array.isArray(data)) {
+            return Response.json({ error: 'Data array is required' }, { status: 400 });
         }
 
         // Calculate all indicators on the same data snapshot
@@ -266,9 +250,6 @@ Deno.serve(async (req) => {
 
         return Response.json({
             success: true,
-            ticker,
-            interval,
-            period,
             config_used: { ema: { fast, medium, slow }, rsi: { period: rsiPeriod, overbought, oversold } },
             count: results.length,
             data: results
@@ -281,4 +262,4 @@ Deno.serve(async (req) => {
             details: 'Failed to calculate comprehensive signals'
         }, { status: 500 });
     }
-});
+    });
