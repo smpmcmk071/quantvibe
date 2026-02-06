@@ -89,8 +89,8 @@ export default function Dashboard() {
     setYahooData(null);
 
     try {
-      // Fetch raw OHLCV data only
-      const response = await base44.functions.invoke('fetchYahooData', {
+      // Fetch signals data including OHLCV and volume indicators
+      const response = await base44.functions.invoke('calculateSignals', {
         ticker: tickerUpper,
         interval: interval,
         period: period
@@ -276,6 +276,10 @@ export default function Dashboard() {
                             <th className="px-2 py-2 text-right font-semibold">Close</th>
                             <th className="px-2 py-2 text-right font-semibold">Volume</th>
                             <th className="px-2 py-2 text-right font-semibold">Return %</th>
+                            <th className="px-2 py-2 text-right font-semibold">Vol Z-Score</th>
+                            <th className="px-2 py-2 text-center font-semibold">Vol Spike</th>
+                            <th className="px-2 py-2 text-center font-semibold">Vol Trend</th>
+                            <th className="px-2 py-2 text-center font-semibold">Vol Signal</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -300,8 +304,21 @@ export default function Dashboard() {
                               <td className={`px-2 py-1.5 text-right font-semibold ${row.return_1d > 0 ? 'text-green-600' : row.return_1d < 0 ? 'text-red-600' : 'text-slate-600'}`}>
                                 {row.return_1d ? row.return_1d.toFixed(2) + '%' : '-'}
                               </td>
-                            </tr>
-                          ))}
+                              <td className="px-2 py-1.5 text-right">{row.vol_zscore ? row.vol_zscore.toFixed(2) : '-'}</td>
+                              <td className="px-2 py-1.5 text-center">{row.vol_spike ? '✓' : '-'}</td>
+                              <td className="px-2 py-1.5 text-center capitalize text-xs">{row.vol_trend || '-'}</td>
+                              <td className="px-2 py-1.5 text-center">
+                                <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                                  row.volume_signal === 'vol_buy' ? 'bg-green-100 text-green-800' : 
+                                  row.volume_signal === 'vol_sell' ? 'bg-red-100 text-red-800' :
+                                  row.volume_signal === 'vol_breakout' ? 'bg-blue-100 text-blue-800' :
+                                  'bg-slate-100 text-slate-600'
+                                }`}>
+                                  {row.volume_signal || 'hold'}
+                                </span>
+                              </td>
+                              </tr>
+                              ))}
                         </tbody>
                       </table>
                     </div>
