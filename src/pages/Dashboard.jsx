@@ -321,6 +321,11 @@ export default function Dashboard() {
                             <th className="px-2 py-2 text-center font-semibold">RSI Signal</th>
                             <th className="px-2 py-2 text-center font-semibold">RSI Bull Div</th>
                             <th className="px-2 py-2 text-center font-semibold">RSI Bear Div</th>
+                            <th className="px-2 py-2 text-right font-semibold">Day Vibe</th>
+                            <th className="px-2 py-2 text-right font-semibold">Eastern</th>
+                            <th className="px-2 py-2 text-right font-semibold">Western</th>
+                            <th className="px-2 py-2 text-left font-semibold">Numerology</th>
+                            <th className="px-2 py-2 text-center font-semibold">Signal</th>
                           </tr>
                         </thead>
                         <tbody>
