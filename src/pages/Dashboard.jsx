@@ -171,18 +171,11 @@ export default function Dashboard() {
     setYahooData(null);
 
     try {
-      // Calculate signals with all indicators
-      const response = await base44.functions.invoke('calculateSignals', {
+      // Fetch raw OHLCV data only
+      const response = await base44.functions.invoke('fetchYahooData', {
         ticker: ticker.toUpperCase(),
         interval: interval,
-        period: period,
-        config: {
-          ema_strategy: { fast: 13, medium: 48, slow: 200 },
-          bollinger: { bb_period: 20, bb_std_dev: 2.0, bb_squeeze_threshold: 0.05 },
-          volume_zscore_period: 20,
-          volume_spike_threshold: 1.7,
-          volume_ma_period: 20
-        }
+        period: period
       });
 
       if (response.data.error) {
