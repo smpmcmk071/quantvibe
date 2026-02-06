@@ -367,10 +367,21 @@ export default function Dashboard() {
                               <td className="px-2 py-1.5 text-center capitalize text-xs">{row.rsi_signal || '-'}</td>
                               <td className="px-2 py-1.5 text-center">{row.rsi_bull_div ? '✓' : '-'}</td>
                               <td className="px-2 py-1.5 text-center">{row.rsi_bear_div ? '✓' : '-'}</td>
+                              <td className="px-2 py-1.5 text-right font-semibold">{row.day_vibe || '-'}</td>
+                              <td className="px-2 py-1.5 text-right font-semibold">{row.full_date_eastern || '-'}</td>
+                              <td className="px-2 py-1.5 text-right font-semibold">{row.full_date_western || '-'}</td>
+                              <td className="px-2 py-1.5 text-left text-xs">{row.numerology_meaning || '-'}</td>
+                              <td className="px-2 py-1.5 text-center text-xs">
+                                <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                                  row.has_master_number ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-600'
+                                }`}>
+                                  {row.numerology_signal || 'neutral'}
+                                </span>
+                              </td>
                               </tr>
                               ))}
-                        </tbody>
-                      </table>
+                              </tbody>
+                              </table>
                     </div>
                   </CardContent>
                 </Card>
