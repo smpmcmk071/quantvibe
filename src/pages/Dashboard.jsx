@@ -118,10 +118,18 @@ export default function Dashboard() {
 
       const rsiData = rsiResponse.data.data;
 
-      // Step 4: Merge results (volume + RSI)
+      // Step 4: Calculate Numerology signals
+      const numerologyResponse = await base44.functions.invoke('getNumerologySignals', {
+        data: rawData
+      });
+
+      const numerologyData = numerologyResponse.data.data;
+
+      // Step 5: Merge results (volume + RSI + numerology)
       enrichedData = enrichedData.map((row, idx) => ({
         ...row,
-        ...rsiData[idx]
+        ...rsiData[idx],
+        ...numerologyData[idx]
       }));
 
       // Reverse for display (newest first) but keep calculations in chronological order
