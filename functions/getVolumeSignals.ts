@@ -36,27 +36,11 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { ticker, interval = '1d', period = '30d' } = await req.json();
+        const { data } = await req.json();
 
-        if (!ticker) {
-            return Response.json({ error: 'Ticker is required' }, { status: 400 });
+        if (!data || !Array.isArray(data)) {
+            return Response.json({ error: 'Data array is required' }, { status: 400 });
         }
-
-        // Step 1: Fetch Yahoo data
-        const yahooResponse = await base44.functions.invoke('fetchYahooData', {
-            ticker,
-            interval,
-            period
-        });
-
-        if (yahooResponse.data.error || !yahooResponse.data.data) {
-            return Response.json({ 
-                error: yahooResponse.data.error || 'No data returned',
-                ticker 
-            }, { status: 404 });
-        }
-
-        let data = yahooResponse.data.data;
 
         // Step 2: Calculate volume indicators
         const zscorePeriod = 20;
