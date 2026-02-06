@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Data array is required' }, { status: 400 });
         }
 
-        const periods = [9, 13, 34, 65, 200];
+        const periods = [50, 200];
         const emaData = {};
 
         periods.forEach(period => {
