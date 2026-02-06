@@ -69,8 +69,7 @@ Deno.serve(async (req) => {
             }
         }
 
-        // Reverse to get most recent first
-        ohlcvData.reverse();
+        // Keep in chronological order (oldest to newest) for calculations
 
         return Response.json({
             success: true,
