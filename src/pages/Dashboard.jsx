@@ -365,7 +365,7 @@ export default function Dashboard() {
                       <table className="w-full text-xs">
                         <thead className="bg-slate-100 border-b sticky top-0">
                           <tr>
-                            <th className="px-2 py-2 text-left font-semibold">Date</th>
+                            <th className="px-2 py-2 text-left font-semibold">Timestamp</th>
                             <th className="px-2 py-2 text-right font-semibold">Close</th>
                             <th className="px-2 py-2 text-right font-semibold">Return %</th>
                             <th className="px-2 py-2 text-center font-semibold">Signal</th>
@@ -380,7 +380,7 @@ export default function Dashboard() {
                         <tbody>
                           {yahooData.data.slice().reverse().map((row, idx) => (
                             <tr key={idx} className={`border-b hover:bg-slate-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
-                              <td className="px-2 py-1.5 font-medium">{row.date}</td>
+                              <td className="px-2 py-1.5 font-medium">{new Date(row.timestamp * 1000).toLocaleString()}</td>
                               <td className="px-2 py-1.5 text-right font-semibold">${row.close?.toFixed(2)}</td>
                               <td className={`px-2 py-1.5 text-right font-semibold ${row.return_1d > 0 ? 'text-green-600' : row.return_1d < 0 ? 'text-red-600' : 'text-slate-600'}`}>
                                 {row.return_1d ? row.return_1d.toFixed(2) + '%' : '-'}
