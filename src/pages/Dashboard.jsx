@@ -346,6 +346,10 @@ export default function Dashboard() {
                                   {row.volume_signal || 'hold'}
                                 </span>
                               </td>
+                              <td className="px-2 py-1.5 text-right">{row.rsi ? row.rsi.toFixed(2) : '-'}</td>
+                              <td className="px-2 py-1.5 text-center capitalize text-xs">{row.rsi_signal || '-'}</td>
+                              <td className="px-2 py-1.5 text-center">{row.rsi_bull_div ? '✓' : '-'}</td>
+                              <td className="px-2 py-1.5 text-center">{row.rsi_bear_div ? '✓' : '-'}</td>
                               </tr>
                               ))}
                         </tbody>
