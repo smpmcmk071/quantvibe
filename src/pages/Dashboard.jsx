@@ -371,7 +371,15 @@ export default function Dashboard() {
                           {yahooData.data.map((row, idx) => (
                             <tr key={idx} className={`border-b hover:bg-slate-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
                               <td className="px-2 py-1.5 font-medium">
-                                {row.timestamp ? new Date(row.timestamp * 1000).toLocaleString() : row.date}
+                                {row.timestamp ? new Date(row.timestamp * 1000).toLocaleString('en-US', { 
+                                  month: '2-digit', 
+                                  day: '2-digit', 
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                  second: '2-digit',
+                                  hour12: false
+                                }) : row.date}
                               </td>
                               <td className="px-2 py-1.5 text-right">${row.open?.toFixed(2)}</td>
                               <td className="px-2 py-1.5 text-right">${row.high?.toFixed(2)}</td>
