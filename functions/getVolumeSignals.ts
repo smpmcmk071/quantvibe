@@ -102,9 +102,6 @@ Deno.serve(async (req) => {
 
         return Response.json({
             success: true,
-            ticker: yahooResponse.data.ticker,
-            interval: yahooResponse.data.interval,
-            period: yahooResponse.data.period,
             count: results.length,
             data: results
         });
