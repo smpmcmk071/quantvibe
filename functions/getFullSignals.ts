@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
         }
 
         // Step 1: Fetch raw OHLCV data
-        const fetchResponse = await base44.asServiceRole.functions.invoke('fetchYahooData', {
+        const fetchResponse = await base44.functions.invoke('fetchYahooData', {
             ticker,
             interval,
             period
@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
         let layeredData = fetchResponse.data.data;
 
         // Step 2: Layer EMA indicators
-        const emaResponse = await base44.asServiceRole.functions.invoke('calculateEMAIndicators', {
+        const emaResponse = await base44.functions.invoke('calculateEMAIndicators', {
             data: layeredData,
             config
         });
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
         layeredData = emaResponse.data.data;
 
         // Step 3: Layer RSI indicators
-        const rsiResponse = await base44.asServiceRole.functions.invoke('calculateRSI', {
+        const rsiResponse = await base44.functions.invoke('calculateRSI', {
             data: layeredData,
             config
         });
@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
         layeredData = rsiResponse.data.data;
 
         // Step 4: Layer Volume indicators
-        const volumeResponse = await base44.asServiceRole.functions.invoke('calculateVolume', {
+        const volumeResponse = await base44.functions.invoke('calculateVolume', {
             data: layeredData,
             config
         });
