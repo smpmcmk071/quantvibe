@@ -102,6 +102,7 @@ export default function Dashboard() {
       }
 
       const rawData = rawDataResponse.data.data;
+      console.log('RAW DATA:', rawData); // Debug: see all fetched data
 
       // Step 2: Calculate volume signals
       const volumeResponse = await base44.functions.invoke('getVolumeSignals', {
