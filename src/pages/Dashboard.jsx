@@ -171,11 +171,18 @@ export default function Dashboard() {
     setYahooData(null);
 
     try {
-      // Fetch from Yahoo Finance
-      const response = await base44.functions.invoke('fetchYahooData', {
+      // Calculate signals with all indicators
+      const response = await base44.functions.invoke('calculateSignals', {
         ticker: ticker.toUpperCase(),
         interval: interval,
-        period: period
+        period: period,
+        config: {
+          ema_strategy: { fast: 13, medium: 48, slow: 200 },
+          bollinger: { bb_period: 20, bb_std_dev: 2.0, bb_squeeze_threshold: 0.05 },
+          volume_zscore_period: 20,
+          volume_spike_threshold: 1.7,
+          volume_ma_period: 20
+        }
       });
 
       if (response.data.error) {
@@ -359,25 +366,46 @@ export default function Dashboard() {
                         <thead className="bg-slate-100 border-b sticky top-0">
                           <tr>
                             <th className="px-2 py-2 text-left font-semibold">Date</th>
-                            <th className="px-2 py-2 text-right font-semibold">Open</th>
-                            <th className="px-2 py-2 text-right font-semibold">High</th>
-                            <th className="px-2 py-2 text-right font-semibold">Low</th>
                             <th className="px-2 py-2 text-right font-semibold">Close</th>
-                            <th className="px-2 py-2 text-right font-semibold">Volume</th>
                             <th className="px-2 py-2 text-right font-semibold">Return %</th>
+                            <th className="px-2 py-2 text-center font-semibold">Signal</th>
+                            <th className="px-2 py-2 text-center font-semibold">EMA Cross</th>
+                            <th className="px-2 py-2 text-center font-semibold">BB Signal</th>
+                            <th className="px-2 py-2 text-center font-semibold">Vol Signal</th>
+                            <th className="px-2 py-2 text-right font-semibold">Vol Spike</th>
+                            <th className="px-2 py-2 text-right font-semibold">BB Pos</th>
+                            <th className="px-2 py-2 text-center font-semibold">Daily Flag</th>
                           </tr>
                         </thead>
                         <tbody>
                           {yahooData.data.slice().reverse().map((row, idx) => (
                             <tr key={idx} className={`border-b hover:bg-slate-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
                               <td className="px-2 py-1.5 font-medium">{row.date}</td>
-                              <td className="px-2 py-1.5 text-right">${row.open?.toFixed(2)}</td>
-                              <td className="px-2 py-1.5 text-right">${row.high?.toFixed(2)}</td>
-                              <td className="px-2 py-1.5 text-right">${row.low?.toFixed(2)}</td>
                               <td className="px-2 py-1.5 text-right font-semibold">${row.close?.toFixed(2)}</td>
-                              <td className="px-2 py-1.5 text-right">{row.volume ? (row.volume / 1000000).toFixed(1) + 'M' : '-'}</td>
                               <td className={`px-2 py-1.5 text-right font-semibold ${row.return_1d > 0 ? 'text-green-600' : row.return_1d < 0 ? 'text-red-600' : 'text-slate-600'}`}>
                                 {row.return_1d ? row.return_1d.toFixed(2) + '%' : '-'}
+                              </td>
+                              <td className="px-2 py-1.5 text-center">
+                                {row.final_signal === 'BUY' && <span className="px-2 py-1 bg-green-100 text-green-800 rounded font-bold text-xs">BUY</span>}
+                                {row.final_signal === 'SELL' && <span className="px-2 py-1 bg-red-100 text-red-800 rounded font-bold text-xs">SELL</span>}
+                                {row.final_signal === 'HOLD' && <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs">HOLD</span>}
+                              </td>
+                              <td className="px-2 py-1.5 text-center">
+                                {row.buy_cross && <span className="text-green-600 font-bold">↑</span>}
+                                {row.sell_cross && <span className="text-red-600 font-bold">↓</span>}
+                                {!row.buy_cross && !row.sell_cross && <span className="text-slate-300">-</span>}
+                              </td>
+                              <td className="px-2 py-1.5 text-center text-xs">{row.bb_signal || '-'}</td>
+                              <td className="px-2 py-1.5 text-center text-xs">{row.volume_signal || '-'}</td>
+                              <td className="px-2 py-1.5 text-center">
+                                {row.vol_spike ? <span className="text-blue-600 font-bold">📊</span> : '-'}
+                              </td>
+                              <td className="px-2 py-1.5 text-right">
+                                {row.bb_position ? (row.bb_position * 100).toFixed(0) + '%' : '-'}
+                              </td>
+                              <td className="px-2 py-1.5 text-center">
+                                {row.daily_compare_flag === 'neutral' && <span className="text-green-600">✓</span>}
+                                {row.daily_compare_flag === 'cross' && <span className="text-red-600 font-bold">⚠</span>}
                               </td>
                             </tr>
                           ))}
