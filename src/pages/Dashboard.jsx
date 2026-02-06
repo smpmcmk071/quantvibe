@@ -89,19 +89,44 @@ export default function Dashboard() {
     setYahooData(null);
 
     try {
-      // Fetch data with volume signals calculated
-      const response = await base44.functions.invoke('getVolumeSignals', {
+      // Step 1: Fetch raw data once
+      const rawDataResponse = await base44.functions.invoke('fetchYahooData', {
         ticker: tickerUpper,
         interval: interval,
         period: period
       });
 
-      if (response.data.error) {
-        alert(response.data.error);
+      if (rawDataResponse.data.error) {
+        alert(rawDataResponse.data.error);
         return;
       }
 
-      setYahooData(response.data);
+      const rawData = rawDataResponse.data.data;
+
+      // Step 2: Calculate volume signals
+      const volumeResponse = await base44.functions.invoke('getVolumeSignals', {
+        data: rawData
+      });
+
+      let enrichedData = volumeResponse.data.data;
+
+      // Step 3: Calculate RSI signals
+      const rsiResponse = await base44.functions.invoke('getRSISignals', {
+        data: rawData
+      });
+
+      const rsiData = rsiResponse.data.data;
+
+      // Step 4: Merge results (volume + RSI)
+      enrichedData = enrichedData.map((row, idx) => ({
+        ...row,
+        ...rsiData[idx]
+      }));
+
+      setYahooData({
+        ...rawDataResponse.data,
+        data: enrichedData
+      });
 
       // Update per-ticker pull count
       if (existingPull.length > 0) {
