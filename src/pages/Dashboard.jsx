@@ -124,6 +124,9 @@ export default function Dashboard() {
         ...rsiData[idx]
       }));
 
+      // Reverse for display (newest first) but keep calculations in chronological order
+      enrichedData.reverse();
+
       setYahooData({
         ...rawDataResponse.data,
         data: enrichedData
