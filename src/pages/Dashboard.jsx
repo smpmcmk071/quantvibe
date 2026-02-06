@@ -41,6 +41,24 @@ export default function Dashboard() {
     enabled: !!user
   });
 
+  const { data: allUsers = [] } = useQuery({
+    queryKey: ['allUsers'],
+    queryFn: async () => {
+      if (user?.role !== 'admin') return [];
+      return await base44.entities.User.list();
+    },
+    enabled: !!user && user?.role === 'admin'
+  });
+
+  const updateUserLimitMutation = useMutation({
+    mutationFn: async ({ userId, newLimit }) => {
+      return await base44.entities.User.update(userId, { daily_pulls_limit: newLimit });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['allUsers'] });
+    }
+  });
+
   const addToWatchlistMutation = useMutation({
     mutationFn: async (data) => await base44.entities.Watchlist.create(data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['watchlist'] })
@@ -311,6 +329,74 @@ export default function Dashboard() {
           {/* Settings Tab */}
           <TabsContent value="settings">
             <div className="grid gap-4">
+
+              {/* Admin: All Users Management */}
+              {user?.role === 'admin' && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>👥 All Users (Admin Only)</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-slate-100 border-b">
+                          <tr>
+                            <th className="px-3 py-2 text-left font-semibold">Name</th>
+                            <th className="px-3 py-2 text-left font-semibold">Email</th>
+                            <th className="px-3 py-2 text-left font-semibold">Role</th>
+                            <th className="px-3 py-2 text-center font-semibold">Tier</th>
+                            <th className="px-3 py-2 text-center font-semibold">Daily Limit</th>
+                            <th className="px-3 py-2 text-center font-semibold">Pulls Today</th>
+                            <th className="px-3 py-2 text-center font-semibold">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {allUsers.map((u) => (
+                            <tr key={u.id} className="border-b hover:bg-slate-50">
+                              <td className="px-3 py-2">{u.full_name}</td>
+                              <td className="px-3 py-2">{u.email}</td>
+                              <td className="px-3 py-2">
+                                <span className={`px-2 py-1 rounded text-xs font-semibold ${u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-600'}`}>
+                                  {u.role}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2 text-center capitalize">{u.tier || 'starter'}</td>
+                              <td className="px-3 py-2 text-center">
+                                <Input
+                                  type="number"
+                                  value={u.daily_pulls_limit}
+                                  onChange={(e) => {
+                                    const newLimit = parseInt(e.target.value);
+                                    if (newLimit >= 0) {
+                                      updateUserLimitMutation.mutate({ userId: u.id, newLimit });
+                                    }
+                                  }}
+                                  className="w-20 text-center"
+                                />
+                              </td>
+                              <td className="px-3 py-2 text-center">{u.pulls_today || 0}</td>
+                              <td className="px-3 py-2 text-center">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    updateUserLimitMutation.mutate({ 
+                                      userId: u.id, 
+                                      newLimit: 0 
+                                    });
+                                  }}
+                                >
+                                  Reset Pulls
+                                </Button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
               <Card>
                 <CardHeader>
                   <CardTitle>👤 Account Information</CardTitle>
