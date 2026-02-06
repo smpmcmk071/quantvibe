@@ -89,22 +89,11 @@ export default function Dashboard() {
     setYahooData(null);
 
     try {
-      // Fetch raw OHLCV data
-      const ohlcvResponse = await base44.functions.invoke('fetchYahooData', {
+      // Fetch data with volume signals calculated
+      const response = await base44.functions.invoke('getVolumeSignals', {
         ticker: tickerUpper,
         interval: interval,
         period: period
-      });
-
-      if (ohlcvResponse.data.error) {
-        alert(ohlcvResponse.data.error);
-        return;
-      }
-
-      // Calculate volume indicators
-      const response = await base44.functions.invoke('calculateVolume', {
-        data: ohlcvResponse.data.data,
-        config: {}
       });
 
       if (response.data.error) {
@@ -112,13 +101,7 @@ export default function Dashboard() {
         return;
       }
 
-      setYahooData({
-        ticker: ohlcvResponse.data.ticker,
-        interval: ohlcvResponse.data.interval,
-        period: ohlcvResponse.data.period,
-        count: response.data.data.length,
-        data: response.data.data
-      });
+      setYahooData(response.data);
 
       // Update per-ticker pull count
       if (existingPull.length > 0) {
