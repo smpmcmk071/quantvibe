@@ -305,6 +305,10 @@ export default function Dashboard() {
                             <th className="px-2 py-2 text-center font-semibold">Vol Spike</th>
                             <th className="px-2 py-2 text-center font-semibold">Vol Trend</th>
                             <th className="px-2 py-2 text-center font-semibold">Vol Signal</th>
+                            <th className="px-2 py-2 text-right font-semibold">RSI</th>
+                            <th className="px-2 py-2 text-center font-semibold">RSI Signal</th>
+                            <th className="px-2 py-2 text-center font-semibold">RSI Bull Div</th>
+                            <th className="px-2 py-2 text-center font-semibold">RSI Bear Div</th>
                           </tr>
                         </thead>
                         <tbody>
