@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Download, Star, Settings, TrendingUp, Database, AlertCircle } from "lucide-react";
+import { Search, Download, Star, Settings, TrendingUp, Database, AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import SignalCard from "../components/signals/SignalCard";
 import SignalChart from "../components/signals/SignalChart";
@@ -15,7 +15,11 @@ import AccessControl from "../components/AccessControl";
 export default function Dashboard() {
   const [ticker, setTicker] = useState('');
   const [source, setSource] = useState('yahoo');
+  const [interval, setInterval] = useState('1d');
+  const [period, setPeriod] = useState('30d');
   const [searchResults, setSearchResults] = useState([]);
+  const [yahooData, setYahooData] = useState(null);
+  const [isLoadingYahoo, setIsLoadingYahoo] = useState(false);
   const [user, setUser] = useState(null);
   const [showColumnSettings, setShowColumnSettings] = useState(false);
   const queryClient = useQueryClient();
@@ -163,18 +167,38 @@ export default function Dashboard() {
       return;
     }
 
-    // Increment pulls counter
-    const today = new Date().toISOString().split('T')[0];
-    const pullsToday = user.last_pull_date === today ? user.pulls_today + 1 : 1;
-    
-    await base44.auth.updateMe({
-      pulls_today: pullsToday,
-      last_pull_date: today
-    });
+    setIsLoadingYahoo(true);
+    setYahooData(null);
 
-    // Trigger search
-    queryClient.invalidateQueries({ queryKey: ['signals', ticker, source] });
-    setSearchResults(signals);
+    try {
+      // Fetch from Yahoo Finance
+      const response = await base44.functions.invoke('fetchYahooData', {
+        ticker: ticker.toUpperCase(),
+        interval: interval,
+        period: period
+      });
+
+      if (response.data.error) {
+        alert(response.data.error);
+        return;
+      }
+
+      setYahooData(response.data);
+
+      // Increment pulls counter
+      const today = new Date().toISOString().split('T')[0];
+      const pullsToday = user.last_pull_date === today ? user.pulls_today + 1 : 1;
+      
+      await base44.auth.updateMe({
+        pulls_today: pullsToday,
+        last_pull_date: today
+      });
+
+    } catch (error) {
+      alert('Failed to fetch data: ' + error.message);
+    } finally {
+      setIsLoadingYahoo(false);
+    }
   };
 
   const handleAddToWatchlist = () => {
@@ -268,25 +292,42 @@ export default function Dashboard() {
                 <CardTitle>🔍 Search Trading Signals</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex gap-3">
+                <div className="flex gap-3 flex-wrap">
                   <Input
-                    placeholder="Enter ticker (SPY, QQQ, NVDA...)"
+                    placeholder="Enter ticker (SPY, QQQ, BTC-USD...)"
                     value={ticker}
                     onChange={(e) => setTicker(e.target.value.toUpperCase())}
-                    className="flex-1"
+                    className="flex-1 min-w-[200px]"
                   />
-                  <Select value={source} onValueChange={setSource}>
-                    <SelectTrigger className="w-32">
+                  <Select value={interval} onValueChange={setInterval}>
+                    <SelectTrigger className="w-28">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="yahoo">Yahoo</SelectItem>
-                      <SelectItem value="kraken">Kraken</SelectItem>
+                      <SelectItem value="1m">1m</SelectItem>
+                      <SelectItem value="5m">5m</SelectItem>
+                      <SelectItem value="15m">15m</SelectItem>
+                      <SelectItem value="1h">1h</SelectItem>
+                      <SelectItem value="1d">1d</SelectItem>
+                      <SelectItem value="1wk">1wk</SelectItem>
+                      <SelectItem value="1mo">1mo</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button onClick={handleSearch} disabled={!ticker || isLoading}>
-                    <Search className="w-4 h-4 mr-2" />
-                    Search
+                  <Select value={period} onValueChange={setPeriod}>
+                    <SelectTrigger className="w-28">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="7d">7 days</SelectItem>
+                      <SelectItem value="30d">30 days</SelectItem>
+                      <SelectItem value="60d">60 days</SelectItem>
+                      <SelectItem value="90d">90 days</SelectItem>
+                      <SelectItem value="1y">1 year</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={handleSearch} disabled={!ticker || isLoadingYahoo}>
+                    {isLoadingYahoo ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Search className="w-4 h-4 mr-2" />}
+                    Fetch Data
                   </Button>
                 </div>
 
@@ -300,6 +341,53 @@ export default function Dashboard() {
                 )}
               </CardContent>
             </Card>
+
+            {yahooData && yahooData.data && (
+              <>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>
+                      📈 {yahooData.ticker} - OHLCV Data ({yahooData.count} rows)
+                    </CardTitle>
+                    <p className="text-sm text-slate-500">
+                      Interval: {yahooData.interval} | Period: {yahooData.period}
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-auto max-h-[600px]">
+                      <table className="w-full text-xs">
+                        <thead className="bg-slate-100 border-b sticky top-0">
+                          <tr>
+                            <th className="px-2 py-2 text-left font-semibold">Date</th>
+                            <th className="px-2 py-2 text-right font-semibold">Open</th>
+                            <th className="px-2 py-2 text-right font-semibold">High</th>
+                            <th className="px-2 py-2 text-right font-semibold">Low</th>
+                            <th className="px-2 py-2 text-right font-semibold">Close</th>
+                            <th className="px-2 py-2 text-right font-semibold">Volume</th>
+                            <th className="px-2 py-2 text-right font-semibold">Return %</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {yahooData.data.slice().reverse().map((row, idx) => (
+                            <tr key={idx} className={`border-b hover:bg-slate-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
+                              <td className="px-2 py-1.5 font-medium">{row.date}</td>
+                              <td className="px-2 py-1.5 text-right">${row.open?.toFixed(2)}</td>
+                              <td className="px-2 py-1.5 text-right">${row.high?.toFixed(2)}</td>
+                              <td className="px-2 py-1.5 text-right">${row.low?.toFixed(2)}</td>
+                              <td className="px-2 py-1.5 text-right font-semibold">${row.close?.toFixed(2)}</td>
+                              <td className="px-2 py-1.5 text-right">{row.volume ? (row.volume / 1000000).toFixed(1) + 'M' : '-'}</td>
+                              <td className={`px-2 py-1.5 text-right font-semibold ${row.return_1d > 0 ? 'text-green-600' : row.return_1d < 0 ? 'text-red-600' : 'text-slate-600'}`}>
+                                {row.return_1d ? row.return_1d.toFixed(2) + '%' : '-'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
 
             {signals.length > 0 && (
               <>
