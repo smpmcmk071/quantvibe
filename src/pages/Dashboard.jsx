@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [yahooData, setYahooData] = useState(null);
   const [isLoadingYahoo, setIsLoadingYahoo] = useState(false);
   const [user, setUser] = useState(null);
+  const [tickerPullCount, setTickerPullCount] = useState(0);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -67,9 +68,20 @@ export default function Dashboard() {
   const handleSearch = async () => {
     if (!ticker) return;
     
-    // Check rate limit
-    if (user?.pulls_today >= user?.daily_pulls_limit) {
-      alert('Daily limit reached! Upgrade to get more pulls.');
+    const today = new Date().toISOString().split('T')[0];
+    const tickerUpper = ticker.toUpperCase();
+    
+    // Check per-ticker rate limit
+    const existingPull = await base44.entities.TickerPull.filter({
+      user_email: user.email,
+      ticker: tickerUpper,
+      pull_date: today
+    });
+    
+    const currentTickerPulls = existingPull.length > 0 ? existingPull[0].pull_count : 0;
+    
+    if (currentTickerPulls >= user?.daily_pulls_limit) {
+      alert(`Daily limit reached for ${tickerUpper}! You've pulled this ticker ${currentTickerPulls} times today.`);
       return;
     }
 
@@ -79,7 +91,7 @@ export default function Dashboard() {
     try {
       // Fetch raw OHLCV data only
       const response = await base44.functions.invoke('fetchYahooData', {
-        ticker: ticker.toUpperCase(),
+        ticker: tickerUpper,
         interval: interval,
         period: period
       });
@@ -91,14 +103,21 @@ export default function Dashboard() {
 
       setYahooData(response.data);
 
-      // Increment pulls counter
-      const today = new Date().toISOString().split('T')[0];
-      const pullsToday = user.last_pull_date === today ? user.pulls_today + 1 : 1;
-      
-      await base44.auth.updateMe({
-        pulls_today: pullsToday,
-        last_pull_date: today
-      });
+      // Update per-ticker pull count
+      if (existingPull.length > 0) {
+        await base44.entities.TickerPull.update(existingPull[0].id, {
+          pull_count: currentTickerPulls + 1
+        });
+        setTickerPullCount(currentTickerPulls + 1);
+      } else {
+        await base44.entities.TickerPull.create({
+          user_email: user.email,
+          ticker: tickerUpper,
+          pull_date: today,
+          pull_count: 1
+        });
+        setTickerPullCount(1);
+      }
 
     } catch (error) {
       alert('Failed to fetch data: ' + error.message);
@@ -151,10 +170,12 @@ export default function Dashboard() {
                 <p className="text-xs text-slate-500">Tier</p>
                 <p className="font-semibold capitalize">{user.tier}</p>
               </div>
-              <div>
-                <p className="text-xs text-slate-500">Pulls Today</p>
-                <p className="font-semibold">{user.pulls_today || 0} / {user.daily_pulls_limit}</p>
-              </div>
+              {ticker && tickerPullCount > 0 && (
+                <div>
+                  <p className="text-xs text-slate-500">Pulls for {ticker.toUpperCase()}</p>
+                  <p className="font-semibold">{tickerPullCount} / {user.daily_pulls_limit}</p>
+                </div>
+              )}
             </div>
           </Card>
         </div>
@@ -221,11 +242,11 @@ export default function Dashboard() {
                   </Button>
                 </div>
 
-                {(user.pulls_today >= user.daily_pulls_limit) && (
+                {ticker && tickerPullCount >= user.daily_pulls_limit && (
                   <Alert>
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      Daily limit reached! Upgrade to <strong>Pro</strong> ($377/mo) for 50 pulls/day or <strong>Elite</strong> ($577/mo) for unlimited.
+                      Daily limit reached for {ticker.toUpperCase()}! You've pulled this ticker {tickerPullCount} times today.
                     </AlertDescription>
                   </Alert>
                 )}
