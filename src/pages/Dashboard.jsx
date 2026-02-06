@@ -368,7 +368,7 @@ export default function Dashboard() {
                           </tr>
                         </thead>
                         <tbody>
-                          {yahooData.data.map((row, idx) => (
+                          {yahooData.data.slice().reverse().map((row, idx) => (
                             <tr key={idx} className={`border-b hover:bg-slate-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
                               <td className="px-2 py-1.5 font-medium">
                                 {row.timestamp ? new Date(row.timestamp * 1000).toLocaleString() : row.date}
