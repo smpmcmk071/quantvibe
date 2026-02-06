@@ -89,8 +89,8 @@ export default function Dashboard() {
     setYahooData(null);
 
     try {
-      // Fetch data with all indicators layered
-      const response = await base44.functions.invoke('getFullSignals', {
+      // Fetch data with volume signals calculated
+      const response = await base44.functions.invoke('getVolumeSignals', {
         ticker: tickerUpper,
         interval: interval,
         period: period
