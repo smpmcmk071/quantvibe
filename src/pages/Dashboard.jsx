@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [ticker, setTicker] = useState('');
   const [source, setSource] = useState('yahoo');
   const [interval, setInterval] = useState('1d');
+  const VALID_INTERVALS = ['15m', '30m', '1h', '1d', '1wk', '1mo'];
   const [period, setPeriod] = useState('30d');
   const [searchResults, setSearchResults] = useState([]);
   const [yahooData, setYahooData] = useState(null);
