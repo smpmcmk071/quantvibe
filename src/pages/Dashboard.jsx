@@ -252,11 +252,9 @@ export default function Dashboard() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1m">1m</SelectItem>
-                      <SelectItem value="5m">5m</SelectItem>
                       <SelectItem value="15m">15m</SelectItem>
+                      <SelectItem value="30m">30m</SelectItem>
                       <SelectItem value="1h">1h</SelectItem>
-                      <SelectItem value="4h">4h</SelectItem>
                       <SelectItem value="1d">1d</SelectItem>
                       <SelectItem value="1wk">1wk</SelectItem>
                       <SelectItem value="1mo">1mo</SelectItem>

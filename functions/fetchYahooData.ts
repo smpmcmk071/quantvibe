@@ -15,9 +15,31 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Ticker is required' }, { status: 400 });
         }
 
-        // Rate limiting: Add delay between requests to respect Yahoo Finance limits
-        // Yahoo Finance allows ~2000 requests/hour, so ~1 request every 2 seconds is safe
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Validate interval - minimum is 15m
+        const allowedIntervals = ['15m', '30m', '1h', '1d', '1wk', '1mo'];
+        if (!allowedIntervals.includes(interval)) {
+            return Response.json({ 
+                error: `Invalid interval "${interval}". Minimum supported interval is 15m. Allowed: ${allowedIntervals.join(', ')}`
+            }, { status: 400 });
+        }
+
+        // Adaptive rate limiting based on interval type
+        const delayMap = { '15m': 2000, '30m': 1500, '1h': 1000, '1d': 500, '1wk': 500, '1mo': 500 };
+        const delay = delayMap[interval] || 1000;
+
+        // Fetch with exponential backoff retry
+        const fetchWithRetry = async (url, options, retries = 3) => {
+            for (let attempt = 0; attempt < retries; attempt++) {
+                await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, attempt)));
+                const res = await fetch(url, options);
+                if (res.status === 429) {
+                    // Rate limited - wait longer before retry
+                    if (attempt < retries - 1) continue;
+                    return Response.json({ error: 'Yahoo Finance rate limit reached. Please wait a moment and try again.' }, { status: 429 });
+                }
+                return res;
+            }
+        };
 
         const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}`;
         const params = new URLSearchParams({
@@ -25,16 +47,14 @@ Deno.serve(async (req) => {
             range: period
         });
 
-        const response = await fetch(`${yahooUrl}?${params}`, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0'
-            }
+        const response = await fetchWithRetry(`${yahooUrl}?${params}`, {
+            headers: { 'User-Agent': 'Mozilla/5.0' }
         });
 
         if (!response.ok) {
             return Response.json({ 
                 error: `Yahoo Finance API error: ${response.status}`,
-                details: 'Ticker may not exist or API rate limit reached'
+                details: response.status === 404 ? 'Ticker not found' : 'API rate limit reached or service unavailable'
             }, { status: response.status });
         }
 
