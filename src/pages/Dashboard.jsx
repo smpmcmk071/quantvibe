@@ -54,8 +54,12 @@ export default function Dashboard() {
   });
 
   const updateUserLimitMutation = useMutation({
-    mutationFn: async ({ userId, newLimit }) => {
-      return await base44.entities.User.update(userId, { daily_pulls_limit: newLimit });
+    mutationFn: async ({ userId, newLimit, userData }) => {
+      return await base44.entities.User.update(userId, { 
+        ...userData,
+        daily_pulls_limit: newLimit,
+        allowed_modules: userData?.allowed_modules || []
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allUsers'] });
