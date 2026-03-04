@@ -478,7 +478,7 @@ export default function Dashboard() {
                                   onChange={(e) => {
                                     const newLimit = parseInt(e.target.value);
                                     if (newLimit >= 0) {
-                                      updateUserLimitMutation.mutate({ userId: u.id, newLimit });
+                                      updateUserLimitMutation.mutate({ userId: u.id, newLimit, userData: u });
                                     }
                                   }}
                                   className="w-20 text-center"
