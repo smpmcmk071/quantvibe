@@ -247,6 +247,7 @@ export default function Dashboard() {
                     placeholder="Enter ticker (SPY, QQQ, BTC-USD...)"
                     value={ticker}
                     onChange={(e) => setTicker(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => e.key === 'Enter' && !isLoadingYahoo && ticker && handleSearch()}
                     className="flex-1 min-w-[200px]"
                   />
                   <Select value={interval} onValueChange={setInterval}>
