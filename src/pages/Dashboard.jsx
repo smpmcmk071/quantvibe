@@ -492,7 +492,8 @@ export default function Dashboard() {
                                   onClick={() => {
                                     updateUserLimitMutation.mutate({ 
                                       userId: u.id, 
-                                      newLimit: 0 
+                                      newLimit: 0,
+                                      userData: u
                                     });
                                   }}
                                 >
