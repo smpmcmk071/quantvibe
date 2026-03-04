@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Download, Star, Settings, TrendingUp, Database, AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import AccessControl from "../components/AccessControl";
+import OHLCVChart from "../components/signals/OHLCVChart";
 
 export default function Dashboard() {
   const [ticker, setTicker] = useState('');
