@@ -293,6 +293,11 @@ export default function Dashboard() {
 
             {yahooData && yahooData.data && (
               <>
+                <OHLCVChart
+                  data={yahooData.data}
+                  ticker={yahooData.ticker}
+                  interval={yahooData.interval}
+                />
                 <Card>
                   <CardHeader>
                     <CardTitle>
