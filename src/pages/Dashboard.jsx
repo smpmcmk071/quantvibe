@@ -345,6 +345,8 @@ export default function Dashboard() {
                             <th className="px-2 py-2 text-right font-semibold">Western</th>
                             <th className="px-2 py-2 text-left font-semibold">Numerology</th>
                             <th className="px-2 py-2 text-center font-semibold">Signal</th>
+                            <th className="px-2 py-2 text-right font-semibold">Hot Streak</th>
+                            <th className="px-2 py-2 text-center font-semibold">Streak Status</th>
                           </tr>
                         </thead>
                         <tbody>
