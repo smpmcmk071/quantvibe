@@ -138,6 +138,13 @@ export default function Dashboard() {
         ...numerologyData[idx]
       }));
 
+      // Step 5.5: Calculate EMAs for hot streak detection
+      const emaResponse = await base44.functions.invoke('calculateEMA', {
+        data: enrichedData
+      });
+
+      enrichedData = emaResponse.data.data;
+
       // Step 6: Calculate Hot Streak signals
       const hotStreakResponse = await base44.functions.invoke('getHotStreakSignals', {
         data: enrichedData,
