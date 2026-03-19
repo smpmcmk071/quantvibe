@@ -138,6 +138,14 @@ export default function Dashboard() {
         ...numerologyData[idx]
       }));
 
+      // Step 6: Calculate Hot Streak signals
+      const hotStreakResponse = await base44.functions.invoke('getHotStreakSignals', {
+        data: enrichedData,
+        config: { lookback_hours: 240, strength_threshold: 50 }
+      });
+
+      enrichedData = hotStreakResponse.data.data;
+
       // Reverse for display (newest first) but keep calculations in chronological order
       enrichedData.reverse();
 
