@@ -399,6 +399,14 @@ export default function Dashboard() {
                                   {row.numerology_signal || 'neutral'}
                                 </span>
                               </td>
+                              <td className="px-2 py-1.5 text-right">{row.hot_streak_strength ? row.hot_streak_strength.toFixed(1) : '-'}</td>
+                              <td className="px-2 py-1.5 text-center">
+                                <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                                  row.hot_streak_active ? 'bg-orange-100 text-orange-800' : 'bg-slate-100 text-slate-600'
+                                }`}>
+                                  {row.hot_streak_signal || 'waiting'}
+                                </span>
+                              </td>
                               </tr>
                               ))}
                               </tbody>
