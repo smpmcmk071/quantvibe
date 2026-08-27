@@ -1,0 +1,161 @@
+{
+  "name": "TradingSignal",
+  "type": "object",
+  "properties": {
+    "ticker": {
+      "type": "string",
+      "description": "Ticker symbol (SPY, QQQ, etc.)"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "yahoo",
+        "kraken"
+      ],
+      "description": "Data source"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Trading date"
+    },
+    "open": {
+      "type": "number"
+    },
+    "high": {
+      "type": "number"
+    },
+    "close": {
+      "type": "number"
+    },
+    "low": {
+      "type": "number"
+    },
+    "volume": {
+      "type": "number"
+    },
+    "close_pct_change": {
+      "type": "number"
+    },
+    "ema_9": {
+      "type": "number"
+    },
+    "ema_13": {
+      "type": "number"
+    },
+    "ema_34": {
+      "type": "number"
+    },
+    "ema_65": {
+      "type": "number"
+    },
+    "ema_200": {
+      "type": "number"
+    },
+    "buy_cross": {
+      "type": "boolean"
+    },
+    "sell_cross": {
+      "type": "boolean"
+    },
+    "buy_cross_9_34": {
+      "type": "boolean"
+    },
+    "sell_cross_9_34": {
+      "type": "boolean"
+    },
+    "rsi": {
+      "type": "number"
+    },
+    "rsi_signal": {
+      "type": "string"
+    },
+    "rsi_bull_div": {
+      "type": "boolean"
+    },
+    "rsi_bear_div": {
+      "type": "boolean"
+    },
+    "macd_line": {
+      "type": "number"
+    },
+    "macd_signal": {
+      "type": "number"
+    },
+    "macd_histogram": {
+      "type": "number"
+    },
+    "macd_cross_up": {
+      "type": "boolean"
+    },
+    "macd_cross_down": {
+      "type": "boolean"
+    },
+    "bb_upper": {
+      "type": "number"
+    },
+    "bb_middle": {
+      "type": "number"
+    },
+    "bb_lower": {
+      "type": "number"
+    },
+    "bb_position": {
+      "type": "number"
+    },
+    "bb_squeeze": {
+      "type": "boolean"
+    },
+    "vol_spike": {
+      "type": "boolean"
+    },
+    "vol_trend": {
+      "type": "string"
+    },
+    "final_signal": {
+      "type": "string",
+      "description": "BUY, SELL, HOLD"
+    },
+    "day_vibe": {
+      "type": "number",
+      "description": "Numerology day vibe"
+    },
+    "month_vibe": {
+      "type": "number",
+      "description": "Numerology month vibe"
+    },
+    "year_vibe": {
+      "type": "number",
+      "description": "Numerology year vibe"
+    },
+    "full_date_eastern": {
+      "type": "number",
+      "description": "Full date Eastern Chaldean (digit-by-digit, month+day+year)"
+    },
+    "full_date_western": {
+      "type": "number",
+      "description": "Full date Western (component sum: month + day + year)"
+    },
+    "numerology_meaning": {
+      "type": "string",
+      "description": "Meaning of the primary numerology number"
+    },
+    "numerology_signal": {
+      "type": "string",
+      "description": "Trading signal based on numerology"
+    },
+    "has_master_number": {
+      "type": "boolean",
+      "description": "Whether any numerology calculation is a master number (11, 22, 33)"
+    },
+    "master_locations": {
+      "type": "string",
+      "description": "Which calculations contain master numbers"
+    }
+  },
+  "required": [
+    "ticker",
+    "source",
+    "date"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "name": "Watchlist",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "User who owns this watchlist item"
+    },
+    "sec_id": {
+      "type": "string",
+      "description": "Security identifier for linking to OHLCVData"
+    },
+    "ticker": {
+      "type": "string",
+      "description": "Ticker symbol"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "yahoo",
+        "kraken"
+      ],
+      "default": "yahoo"
+    },
+    "notes": {
+      "type": "string",
+      "description": "User notes about this ticker"
+    }
+  },
+  "required": [
+    "user_email",
+    "ticker"
+  ]
+}

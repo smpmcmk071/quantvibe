@@ -1,0 +1,29 @@
+{
+  "name": "TickerPull",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "User who made the pull"
+    },
+    "ticker": {
+      "type": "string",
+      "description": "Ticker symbol"
+    },
+    "pull_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the pull"
+    },
+    "pull_count": {
+      "type": "number",
+      "default": 1,
+      "description": "Number of pulls for this ticker today"
+    }
+  },
+  "required": [
+    "user_email",
+    "ticker",
+    "pull_date"
+  ]
+}

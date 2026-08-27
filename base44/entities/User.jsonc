@@ -1,0 +1,62 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "tier": {
+      "type": "string",
+      "enum": [
+        "starter",
+        "pro",
+        "elite"
+      ],
+      "default": "starter",
+      "description": "Subscription tier"
+    },
+    "daily_pulls_limit": {
+      "type": "number",
+      "default": 11,
+      "description": "Daily API pulls allowed"
+    },
+    "pulls_today": {
+      "type": "number",
+      "default": 0,
+      "description": "Pulls used today"
+    },
+    "last_pull_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Last pull date for reset tracking"
+    },
+    "has_macro_access": {
+      "type": "boolean",
+      "default": false,
+      "description": "Access to Macro Data"
+    },
+    "has_numerology_premium": {
+      "type": "boolean",
+      "default": false,
+      "description": "Access to Numerology Premium"
+    },
+    "has_auction_premium": {
+      "type": "boolean",
+      "default": false,
+      "description": "Access to Auction Data Premium"
+    },
+    "max_tickers": {
+      "type": "number",
+      "default": 5,
+      "description": "Max tickers in watchlist"
+    },
+    "allowed_modules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Allowed indicator modules (bollinger, rsi, macd, etc.)"
+    }
+  },
+  "required": [
+    "last_pull_date",
+    "allowed_modules"
+  ]
+}

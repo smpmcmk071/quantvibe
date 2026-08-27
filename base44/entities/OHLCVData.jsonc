@@ -1,0 +1,76 @@
+{
+  "name": "OHLCVData",
+  "type": "object",
+  "properties": {
+    "ticker": {
+      "type": "string",
+      "description": "Ticker symbol"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Trading date"
+    },
+    "source_cd": {
+      "type": "string",
+      "enum": [
+        "yahoo",
+        "kraken",
+        "alpaca",
+        "polygon"
+      ],
+      "default": "yahoo",
+      "description": "Data source code"
+    },
+    "time_period": {
+      "type": "string",
+      "enum": [
+        "1D",
+        "1H",
+        "15M",
+        "5M",
+        "1M"
+      ],
+      "default": "1D",
+      "description": "Time period/interval for OHLCV data"
+    },
+    "open": {
+      "type": "number",
+      "description": "Opening price"
+    },
+    "high": {
+      "type": "number",
+      "description": "High price"
+    },
+    "low": {
+      "type": "number",
+      "description": "Low price"
+    },
+    "close": {
+      "type": "number",
+      "description": "Closing price"
+    },
+    "volume": {
+      "type": "number",
+      "description": "Trading volume"
+    },
+    "return_1d": {
+      "type": "number",
+      "description": "1-day return percentage"
+    },
+    "vol_1d_sigma": {
+      "type": "number",
+      "description": "1-day volatility sigma (standard deviation)"
+    }
+  },
+  "required": [
+    "ticker",
+    "date",
+    "source_cd",
+    "time_period",
+    "high",
+    "low",
+    "close",
+    "volume"
+  ]
+}
